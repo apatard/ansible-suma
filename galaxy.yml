@@ -1,0 +1,16 @@
+---
+namespace: apatard
+name: suma
+version: 0.0.1
+readme: README.md
+authors:
+  - Arnaud Patard <apatard@hupstream.com>
+
+
+description: Collection of modules for suse manager
+license:
+  - GPL-3.0-or-later
+tags: []
+dependencies: {}
+repository: http://example.com/repository
+build_ignore: []

@@ -1,0 +1,108 @@
+---
+- name: Add certificates
+  hosts: suma
+  become: true
+  tasks:
+    - name: Copy certificates
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "/etc/pki/trust/anchors/{{ item.dest }}"
+        mode: 0644
+        owner: root
+        group: root
+      with_items: "{{ suma_rootca }}"
+      register: ca_cert_update
+
+    - name: Update cert db  # noqa no-handler
+      ansible.builtin.command: update-ca-certificates
+      when: ca_cert_update is changed
+
+    - name: Get installed package list
+      ansible.builtin.package_facts:
+
+    - name: Install salt-minion package
+      block:  # noqa key-order[task]
+        - name: Add bootstrap repo
+          community.general.zypper_repository:  # noqa yaml[line-length]
+            name: bootstrap
+            repo: "https://{{ suma_host }}/pub/repositories/sle/{{ ansible_facts.distribution_major_version }}/{{ ansible_facts.distribution_release }}/bootstrap/"
+            disable_gpg_check: true
+            state: present
+        - name: Install salt-minion
+          ansible.builtin.package:
+            name: salt-minion
+            state: present
+        - name: Configure minion
+          ansible.builtin.template:
+            src: "{{ suma_minion_conf_template | default('susemanager.conf.j2') }}"
+            dest: /etc/salt/minion.d/susemanager.conf
+            owner: root
+            group: root
+            mode: 0644
+      notify: Reload salt-minion
+      always:
+        - name: Remove bootstrap repo
+          community.general.zypper_repository:
+            name: bootstrap
+            disable_gpg_check: true
+            state: absent
+      when: "'salt-minion' not in ansible_facts.packages"
+
+    - name: Enable salt-minion
+      ansible.builtin.service:
+        name: salt-minion
+        enabled: true
+
+    - name: Start salt-minion
+      ansible.builtin.service:
+        name: salt-minion
+        state: started
+
+    - name: Ensure that the minion has loaded suma conf
+      ansible.builtin.meta: flush_handlers
+
+    - name: Accept salt key
+      apatard.suma.saltkey:
+        key: "{{ ansible_fqdn }}"
+        state: accepted
+        hostname: "{{ suma_host }}"
+        login: "{{ suma_login }}"
+        password: "{{ suma_password }}"
+
+    # find a better way ?
+    - name: Get IP on suma network
+      ansible.builtin.set_fact:
+        suma_net_ip: "{{ ansible_all_ipv4_addresses | map('regex_search', suma_net_regexp) | list | select('string') | first }}"
+
+    - name: Wait for system in system list
+      apatard.suma.systems_facts:
+        hostname: "{{ suma_host }}"
+        login: "{{ suma_login }}"
+        password: "{{ suma_password }}"
+      until: "suma_net_ip in (suma_systems | map(attribute='ip'))"
+      delay: 5
+      retries: 24
+
+    - name: Get sys infos for system
+      ansible.builtin.set_fact:
+        suma_sys_info: "{{ suma_systems | selectattr('ip', 'equalto', suma_net_ip) | first }}"
+
+    # Nasty way to find if system ready
+    # merge module into suma_systems_facts ?
+    - name: Wait for system products list not empty
+      apatard.suma.system_info:
+        info: 'products'
+        id: "{{ suma_sys_info.system_id }}"
+        hostname: "{{ suma_host }}"
+        login: "{{ suma_login }}"
+        password: "{{ suma_password }}"
+      register: sys_infos
+      until: "sys_infos.info | length > 0"
+      delay: 5
+      retries: 24
+
+  handlers:
+    - name: Reload salt-minion
+      ansible.builtin.service:
+        name: salt-minion
+        state: restarted

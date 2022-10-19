@@ -1,0 +1,10 @@
+---
+master: "{{ suma_host }}"
+server_id_use_crc: adler32
+enable_legacy_startup_events: false
+enable_fqdns_grains: false
+mine_enabled: false
+
+grains:
+  susemanager:
+    activation_key: "{{ suma_actkey }}"
