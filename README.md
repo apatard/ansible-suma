@@ -62,7 +62,6 @@ The playbooks are looking like:
 ```
 
 ```
-```
 
 ---
 - name: Unregister system
