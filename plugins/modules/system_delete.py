@@ -70,7 +70,7 @@ def main():
         module.fail_json(msg=f"Failed to get list of systems: {fault}")
 
     try:
-        next(sysinfo for sysinfo in syslist if sysinfo['id'] == module.params["id"])
+        next(sysinfo for sysinfo in syslist if sysinfo["id"] == module.params["id"])
     except StopIteration:
         client.auth.logout(session_key)
         module.exit_json(changed=False)

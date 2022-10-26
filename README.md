@@ -46,7 +46,7 @@ The playbooks are looking like:
 
 ```
 ---
-- name: Boostrap hosts
+- name: Bootstrap hosts
   import_playbook: apatard.suma.bootstrap
   vars:
     suma_net_regexp: '192\.168\.254.*'

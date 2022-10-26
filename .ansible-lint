@@ -1,0 +1,4 @@
+---
+mock_modules:
+  - community.general.zypper_repository
+  - community.general.zypper
