@@ -62,45 +62,50 @@
     - name: Ensure that the minion has loaded suma conf
       ansible.builtin.meta: flush_handlers
 
-    - name: Accept salt key
-      apatard.suma.saltkey:
-        key: "{{ ansible_fqdn }}"
-        state: accepted
-        hostname: "{{ suma_host }}"
-        login: "{{ suma_login }}"
-        password: "{{ suma_password }}"
+    - name: Accept key and wait for the system to appear in SUSE Manager
+      block:  # noqa key-order[task]
+        - name: Accept salt key
+          apatard.suma.saltkey:
+            key: "{{ ansible_fqdn }}"
+            state: accepted
+            hostname: "{{ suma_host }}"
+            login: "{{ suma_login }}"
+            password: "{{ suma_password }}"
 
-    # find a better way ?
-    - name: Get IP on suma network
-      ansible.builtin.set_fact:
-        suma_net_ip: "{{ ansible_all_ipv4_addresses | map('regex_search', suma_net_regexp) | list | select('string') | first }}"
+        # find a better way ?
+        - name: Get IP on suma network
+          ansible.builtin.set_fact:
+            suma_net_ip: "{{ ansible_all_ipv4_addresses | map('regex_search', suma_net_regexp) | list | select('string') | first }}"
 
-    - name: Wait for system in system list
-      apatard.suma.systems_facts:
-        hostname: "{{ suma_host }}"
-        login: "{{ suma_login }}"
-        password: "{{ suma_password }}"
-      until: "suma_net_ip in (suma_systems | map(attribute='ip'))"
-      delay: 5
-      retries: 24
+        - name: Wait for system in system list
+          apatard.suma.systems_facts:
+            hostname: "{{ suma_host }}"
+            login: "{{ suma_login }}"
+            password: "{{ suma_password }}"
+          until: "suma_net_ip in (suma_systems | map(attribute='ip'))"
+          delay: 5
+          retries: 24
 
-    - name: Get sys infos for system
-      ansible.builtin.set_fact:
-        suma_sys_info: "{{ suma_systems | selectattr('ip', 'equalto', suma_net_ip) | first }}"
+        - name: Get sys infos for system
+          ansible.builtin.set_fact:
+            suma_sys_info: "{{ suma_systems | selectattr('ip', 'equalto', suma_net_ip) | first }}"
 
-    # Nasty way to find if system ready
-    # merge module into suma_systems_facts ?
-    - name: Wait for system products list not empty
-      apatard.suma.system_info:
-        info: 'products'
-        id: "{{ suma_sys_info.system_id }}"
-        hostname: "{{ suma_host }}"
-        login: "{{ suma_login }}"
-        password: "{{ suma_password }}"
-      register: sys_infos
-      until: "sys_infos.info | length > 0"
-      delay: 5
-      retries: 24
+        # Nasty way to find if system ready
+        # merge module into suma_systems_facts ?
+        - name: Wait for system products list not empty
+          apatard.suma.system_info:
+            info: 'products'
+            id: "{{ suma_sys_info.system_id }}"
+            hostname: "{{ suma_host }}"
+            login: "{{ suma_login }}"
+            password: "{{ suma_password }}"
+          register: sys_infos
+          until: "sys_infos.info | length > 0"
+          delay: 5
+          retries: 24
+      when:
+        - (suma_accept_key is not defined) or (suma_accept_key | bool)
+
 
   handlers:
     - name: Reload salt-minion
