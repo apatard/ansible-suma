@@ -90,12 +90,17 @@
           ansible.builtin.set_fact:
             suma_sys_info: "{{ suma_systems | selectattr('ip', 'equalto', suma_net_ip) | first }}"
 
+        - name: Set system id as fact
+          ansible.builtin.set_fact:
+            suma_system_id: "{{ suma_sys_info.system_id }}"
+            cacheable: true
+
         # Nasty way to find if system ready
         # merge module into suma_systems_facts ?
         - name: Wait for system products list not empty
           apatard.suma.system_info:
             info: 'products'
-            id: "{{ suma_sys_info.system_id }}"
+            id: "{{ suma_system_id }}"
             hostname: "{{ suma_host }}"
             login: "{{ suma_login }}"
             password: "{{ suma_password }}"
