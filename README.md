@@ -10,6 +10,7 @@ vagrant.
 | Module                     | Description                                    |
 |----------------------------|------------------------------------------------|
 | apatard.suma.saltkey       | Accepts/Deletes/Rejects suse manager salt keys |
+| apatard.suma.system_addon  | Add or remove addons                           |
 | apatard.suma.system_delete | Delete synchronously a system                  |
 | apatard.suma.system_info   | Return info about a system registered to SUMA  |
 | apatard.suma.systems_facts | Returns all registered systems ids             |
