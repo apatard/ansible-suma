@@ -14,6 +14,37 @@ vagrant.
 | apatard.suma.system_info   | Return info about a system registered to SUMA  |
 | apatard.suma.systems_facts | Returns all registered systems ids             |
 
+## Bootstrap Playbook
+
+This playbook will automatically bootstrap systems on SUSE Manager. It's inspired by what's done by SUSE Manager when bootstrapping.
+
+It will run on the hosts belonging to the ``suma`` group and not on ``all`` systems of the inventory.
+
+Several variables are used:
+
+-  ``suma_rootca``: List of CA certificates to add to the systems
+-  ``suma_host``: FQDN of the SUSE Manager instance **Required**
+-  ``suma_minion_conf_template``: Template for the first salt minion configuration file. Used only after installing the salt-minion package. Otherwise ansible will overwrite the configuration done later by salt. There's a default template provided with the playbook.
+-  ``suma_actkey``: Activation key to use **Required**
+-  ``suma_login``: Account on SUSE Manager to use **Required**
+-  ``suma_password``: Password for the SUSE Manager account **Required**
+-  ``suma_accept_key``: Automatically accept the salt key in SUSE Manager. Defaults to automatically accept.
+-  ``suma_net_regexp``: Regular expression used to find the IPv4 of the system on the SUSE Manager network. *Required if ``suma_accept_key`` is True or not specified.*
+
+
+## Delete Playbook
+
+This playbook will unregister a system on SUSE Manager by its ``hostname`` in SUSE Manager. Obviously, if the system host id is known, this playbook can be replaced by a call to ``apatard.suma.system_delete``.
+
+
+Playbook variables:
+
+-  ``suma_host``: FQDN of the SUSE Manager instance **Required**
+-  ``suma_login``: Account on SUSE Manager to use **Required**
+-  ``suma_password``: Password for the SUSE Manager account **Required**
+-  ``suma_system_name``: Hostname of the system to delete. **Required**
+
+
 ## Example of usage
 
 ```
