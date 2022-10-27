@@ -1,3 +1,7 @@
+# Copyright (c) 2022, Arnaud Patard <apatard@hupstream.com>
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 from xmlrpc.client import ServerProxy
 from xmlrpc.client import Fault as rpcFault
 import socket

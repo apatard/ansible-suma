@@ -1,4 +1,7 @@
 #!/usr/bin/python
+# Copyright (c) 2022, Arnaud Patard <apatard@hupstream.com>
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.apatard.suma.plugins.module_utils.suma_utils import (
