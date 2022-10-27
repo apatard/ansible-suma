@@ -12,6 +12,7 @@
         group: root
       with_items: "{{ suma_rootca }}"
       register: ca_cert_update
+      when: "suma_rootca | length > 0"
 
     - name: Update cert db  # noqa no-handler
       ansible.builtin.command: update-ca-certificates
