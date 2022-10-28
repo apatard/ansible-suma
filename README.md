@@ -30,6 +30,7 @@ Several variables are used:
 -  ``suma_login``: Account on SUSE Manager to use **Required**
 -  ``suma_password``: Password for the SUSE Manager account **Required**
 -  ``suma_accept_key``: Automatically accept the salt key in SUSE Manager. Defaults to automatically accept.
+-  ``suma_host_key``: String to use as minion salt key name. If not specified use the FQDN of the system.
 -  ``suma_net_regexp``: Regular expression used to find the IPv4 of the system on the SUSE Manager network. *Required if ``suma_accept_key`` is True or not specified.*
 
 
