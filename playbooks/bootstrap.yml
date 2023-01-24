@@ -33,14 +33,6 @@
           ansible.builtin.package:
             name: salt-minion
             state: present
-        - name: Configure minion
-          ansible.builtin.template:
-            src: "{{ suma_minion_conf_template | default('susemanager.conf.j2') }}"
-            dest: /etc/salt/minion.d/susemanager.conf
-            owner: root
-            group: root
-            mode: 0644
-      notify: Reload salt-minion
       always:
         - name: Remove bootstrap repo
           community.general.zypper_repository:
@@ -48,6 +40,16 @@
             disable_gpg_check: true
             state: absent
       when: "'salt-minion' not in ansible_facts.packages"
+
+    - name: Configure minion
+      ansible.builtin.template:
+        src: "{{ suma_minion_conf_template | default('susemanager.conf.j2') }}"
+        dest: /etc/salt/minion.d/susemanager.conf
+        owner: root
+        group: root
+        mode: 0644
+        force: false
+      notify: Reload salt-minion
 
     - name: Enable salt-minion
       ansible.builtin.service:
