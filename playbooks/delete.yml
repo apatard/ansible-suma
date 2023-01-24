@@ -10,19 +10,24 @@
         login: "{{ suma_login }}"
         password: "{{ suma_password }}"
 
-    - name: Get sys infos for system
-      ansible.builtin.set_fact:
-        suma_sys_info: "{{ suma_systems | selectattr('hostname', 'equalto', suma_system_name) | first }}"
+    - name: Delete system  # noqa key-order[task]
+      block:
+        - name: Get sys infos for system
+          ansible.builtin.set_fact:
+            suma_sys_info: "{{ suma_systems | selectattr('hostname', 'equalto', suma_system_name) | first }}"
 
-    - name: Print system infos
-      ansible.builtin.debug:
-        msg: "Found host: {{ suma_sys_info.hostname }} id: {{ suma_sys_info.system_id }}"
-        verbosity: 1
+        - name: Print system infos
+          ansible.builtin.debug:
+            msg: "Found host: {{ suma_sys_info.hostname }} id: {{ suma_sys_info.system_id }}"
+            verbosity: 1
 
-    - name: Delete system
-      apatard.suma.system_delete:
-        id: "{{ suma_sys_info.system_id }}"
-        cleanup: force
-        hostname: "{{ suma_host }}"
-        login: "{{ suma_login }}"
-        password: "{{ suma_password }}"
+        - name: Delete system
+          apatard.suma.system_delete:
+            id: "{{ suma_sys_info.system_id }}"
+            cleanup: force
+            hostname: "{{ suma_host }}"
+            login: "{{ suma_login }}"
+            password: "{{ suma_password }}"
+      when:
+        - suma_systems | length > 0
+        - suma_systems | selectattr('hostname', 'equalto', suma_system_name) | length > 0
