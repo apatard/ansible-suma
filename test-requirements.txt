@@ -1,0 +1,5 @@
+ansible-core
+pytest
+mock
+pytest-xdist
+pytest-forked
