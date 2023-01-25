@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from xmlrpc.client import ServerProxy
+import xmlrpc.client
 from xmlrpc.client import Fault as rpcFault
 import socket
 import ssl
@@ -17,7 +17,9 @@ def suma_connect(module):
         context.verify_mode = ssl.CERT_NONE
 
     try:
-        client = ServerProxy(manager_url, context=context, use_datetime=True)
+        client = xmlrpc.client.ServerProxy(
+            manager_url, context=context, use_datetime=True
+        )
     except socket.gaierror:
         module.fail_json(msg="Failed to connect")
 
@@ -27,5 +29,9 @@ def suma_connect(module):
         )
     except rpcFault as fault:
         module.fail_json(msg=f"Failed to login: {fault}")
+    except xmlrpc.client.ProtocolError as fault:
+        module.fail_json(msg=f"Failed to login: {fault}")
+    except socket.gaierror:
+        module.fail_json(msg="Failed to connect")
 
     return (client, session_key)

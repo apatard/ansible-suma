@@ -64,9 +64,12 @@ def main():
 
     (client, session_key) = suma_connect(module)
 
-    accepted_keylist = client.saltkey.acceptedList(session_key)
-    pending_keylist = client.saltkey.pendingList(session_key)
-    rejected_keylist = client.saltkey.rejectedList(session_key)
+    try:
+        accepted_keylist = client.saltkey.acceptedList(session_key)
+        pending_keylist = client.saltkey.pendingList(session_key)
+        rejected_keylist = client.saltkey.rejectedList(session_key)
+    except rpcFault as fault:
+        module.fail_json(msg=f"Failed to get key infos: {fault}")
 
     keylist = accepted_keylist + pending_keylist + rejected_keylist
     if saltkey not in keylist:
