@@ -73,6 +73,9 @@ def main():
 
     keylist = accepted_keylist + pending_keylist + rejected_keylist
     if saltkey not in keylist:
+        if module.params["state"] == "absent":
+            client.auth.logout(session_key)
+            module.exit_json(changed=False)
         client.auth.logout(session_key)
         module.fail_json(msg="Key not found")
 
